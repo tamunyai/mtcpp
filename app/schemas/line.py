@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import Enum
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class LineStatus(str, Enum):
@@ -21,12 +21,11 @@ class LineUpdateStatus(BaseModel):
 
 
 class LineResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     account_id: int
     msisdn: str
     plan_name: str
     status: LineStatus
     created_at: datetime
-
-    class Config:
-        from_attributes = True
