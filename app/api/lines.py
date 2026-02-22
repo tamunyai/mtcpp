@@ -8,6 +8,7 @@ from app.db.session import get_db
 from app.schemas.line import LineCreate, LineResponse, LineUpdateStatus
 from app.schemas.user import UserRole
 from app.services.line_service import (
+    commission_line,
     create_line,
     delete_line,
     get_lines_by_account,
@@ -49,3 +50,10 @@ def remove_line(
     line_id: int, db: Session = Depends(get_db), user=Depends(require_role(UserRole.ADMIN))
 ):
     return delete_line(db, line_id)
+
+
+@router.post("/lines/{line_id}/commission", response_model=LineResponse)
+def commission_line_endpoint(
+    line_id: int, db: Session = Depends(get_db), user=Depends(require_role(UserRole.ADMIN))
+):
+    return commission_line(db, line_id)

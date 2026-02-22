@@ -1,3 +1,5 @@
+import time
+
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
@@ -64,4 +66,36 @@ def delete_line(db: Session, line_id: int):
     db.commit()
 
     logger.info(f"Line deleted: Line {line.id}")
+    return line
+
+
+def commission_line(db: Session, line_id: int):
+    line = db.query(Line).filter(Line.id == line_id).first()
+
+    if not line:
+        raise HTTPException(status_code=404, detail="Line not found")
+
+    # Validation rules
+    if line.status == LineStatus.ACTIVE:
+        raise HTTPException(status_code=400, detail="Line is already active")
+
+    if line.status == LineStatus.DELETED:
+        raise HTTPException(status_code=400, detail="Cannot commission deleted line")
+
+    if line.status != LineStatus.PROVISIONED:
+        raise HTTPException(
+            status_code=400, detail=f"Cannot commission line in status {line.status}"
+        )
+
+    logger.info(f"Commissioning started for Line {line.id}")
+
+    # Optional delay (simulate provisioning)
+    time.sleep(2)
+
+    line.status = LineStatus.ACTIVE
+    db.commit()
+    db.refresh(line)
+
+    logger.info(f"Commissioning completed for Line {line.id}")
+
     return line
