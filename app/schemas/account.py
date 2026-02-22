@@ -19,10 +19,10 @@ class AccountCreate(BaseModel):
 
 
 class AccountUpdate(BaseModel):
-    full_name: Optional[str]
-    email: Optional[EmailStr]
-    phone: Optional[str]
-    status: Optional[AccountStatus]
+    full_name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    phone: Optional[str] = None
+    status: Optional[AccountStatus] = None
 
 
 class AccountResponse(BaseModel):
