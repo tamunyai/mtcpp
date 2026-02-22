@@ -1,0 +1,12 @@
+services:
+  api:
+    build: .
+    container_name: mtcpp-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    env_file:
+      - .env
+    restart: always
