@@ -1,6 +1,6 @@
-from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.exceptions import NotFoundException
 from app.core.logging import get_logger
 from app.models.account import Account
 from app.schemas.account import AccountCreate, AccountUpdate
@@ -31,7 +31,7 @@ def get_account_by_id(db: Session, account_id: int):
     account = db.query(Account).filter(Account.id == account_id).first()
 
     if not account:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Account not found")
+        raise NotFoundException(detail="Account not found")
 
     return account
 

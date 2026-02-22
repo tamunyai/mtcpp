@@ -1,8 +1,8 @@
 import time
 
-from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
+from app.core.exceptions import BadRequestException, NotFoundException
 from app.core.logging import get_logger
 from app.models.account import Account
 from app.models.line import Line
@@ -15,7 +15,7 @@ def create_line(db: Session, account_id: int, line_data: LineCreate):
     account = db.query(Account).filter(Account.id == account_id).first()
 
     if not account:
-        raise HTTPException(status_code=404, detail="Account not found")
+        raise NotFoundException(detail="Account not found")
 
     line = Line(
         account_id=account_id,
@@ -40,13 +40,13 @@ def update_line_status(db: Session, line_id: int, new_status: str):
     line = db.query(Line).filter(Line.id == line_id).first()
 
     if not line:
-        raise HTTPException(status_code=404, detail="Line not found")
+        raise NotFoundException(detail="Line not found")
 
     if line.status == LineStatus.DELETED:
-        raise HTTPException(status_code=400, detail="Cannot update a deleted line")
+        raise BadRequestException(detail="Cannot update a deleted line")
 
     if new_status == LineStatus.ACTIVE and line.status == LineStatus.DELETED:
-        raise HTTPException(status_code=400, detail="Cannot activate deleted line")
+        raise BadRequestException(detail="Cannot activate deleted line")
 
     line.status = new_status
     db.commit()
@@ -60,7 +60,7 @@ def delete_line(db: Session, line_id: int):
     line = db.query(Line).filter(Line.id == line_id).first()
 
     if not line:
-        raise HTTPException(status_code=404, detail="Line not found")
+        raise NotFoundException(detail="Line not found")
 
     line.status = LineStatus.DELETED
     db.commit()
@@ -73,19 +73,17 @@ def commission_line(db: Session, line_id: int):
     line = db.query(Line).filter(Line.id == line_id).first()
 
     if not line:
-        raise HTTPException(status_code=404, detail="Line not found")
+        raise NotFoundException(detail="Line not found")
 
     # Validation rules
     if line.status == LineStatus.ACTIVE:
-        raise HTTPException(status_code=400, detail="Line is already active")
+        raise BadRequestException(detail="Line is already active")
 
     if line.status == LineStatus.DELETED:
-        raise HTTPException(status_code=400, detail="Cannot commission deleted line")
+        raise BadRequestException(detail="Cannot commission deleted line")
 
     if line.status != LineStatus.PROVISIONED:
-        raise HTTPException(
-            status_code=400, detail=f"Cannot commission line in status {line.status}"
-        )
+        raise BadRequestException(detail=f"Cannot commission line in status {line.status}")
 
     logger.info(f"Commissioning started for Line {line.id}")
 
