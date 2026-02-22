@@ -1,0 +1,43 @@
+from typing import List
+
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+
+from app.core.dependencies import get_current_user, require_role
+from app.db.session import get_db
+from app.schemas.account import AccountCreate, AccountResponse, AccountUpdate
+from app.services.account_service import (
+    create_account,
+    get_account_by_id,
+    get_accounts,
+    update_account,
+)
+
+router = APIRouter(prefix="/accounts", tags=["Accounts"])
+
+
+@router.post("/", response_model=AccountResponse)
+def create_new_account(
+    account: AccountCreate, db: Session = Depends(get_db), user=Depends(require_role("ADMIN"))
+):
+    return create_account(db, account)
+
+
+@router.get("/", response_model=List[AccountResponse])
+def list_accounts(db: Session = Depends(get_db), user=Depends(get_current_user)):
+    return get_accounts(db)
+
+
+@router.get("/{account_id}", response_model=AccountResponse)
+def get_account(account_id: int, db: Session = Depends(get_db), user=Depends(get_current_user)):
+    return get_account_by_id(db, account_id)
+
+
+@router.put("/{account_id}", response_model=AccountResponse)
+def update_existing_account(
+    account_id: int,
+    account: AccountUpdate,
+    db: Session = Depends(get_db),
+    user=Depends(require_role("ADMIN")),
+):
+    return update_account(db, account_id, account)
