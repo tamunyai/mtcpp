@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from app.api import accounts, auth
+from app.api import accounts, auth, lines
 from app.core.config import settings
 from app.core.logging import get_logger
 from app.db.base import Base
@@ -33,6 +33,7 @@ app = FastAPI(title=settings.APP_NAME, lifespan=lifespan)
 
 app.include_router(auth.router)
 app.include_router(accounts.router)
+app.include_router(lines.router)
 
 
 @app.get("/")

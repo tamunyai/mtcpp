@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.core.dependencies import get_current_user, require_role
 from app.db.session import get_db
 from app.schemas.account import AccountCreate, AccountResponse, AccountUpdate
+from app.schemas.user import UserRole
 from app.services.account_service import (
     create_account,
     get_account_by_id,
@@ -18,7 +19,9 @@ router = APIRouter(prefix="/accounts", tags=["Accounts"])
 
 @router.post("/", response_model=AccountResponse)
 def create_new_account(
-    account: AccountCreate, db: Session = Depends(get_db), user=Depends(require_role("ADMIN"))
+    account: AccountCreate,
+    db: Session = Depends(get_db),
+    user=Depends(require_role(UserRole.ADMIN)),
 ):
     return create_account(db, account)
 
@@ -38,6 +41,6 @@ def update_existing_account(
     account_id: int,
     account: AccountUpdate,
     db: Session = Depends(get_db),
-    user=Depends(require_role("ADMIN")),
+    user=Depends(require_role(UserRole.ADMIN)),
 ):
     return update_account(db, account_id, account)

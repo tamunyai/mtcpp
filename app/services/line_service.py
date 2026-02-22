@@ -1,0 +1,67 @@
+from fastapi import HTTPException
+from sqlalchemy.orm import Session
+
+from app.core.logging import get_logger
+from app.models.account import Account
+from app.models.line import Line
+from app.schemas.line import LineCreate, LineStatus
+
+logger = get_logger()
+
+
+def create_line(db: Session, account_id: int, line_data: LineCreate):
+    account = db.query(Account).filter(Account.id == account_id).first()
+
+    if not account:
+        raise HTTPException(status_code=404, detail="Account not found")
+
+    line = Line(
+        account_id=account_id,
+        msisdn=line_data.msisdn,
+        plan_name=line_data.plan_name,
+        status=LineStatus.PROVISIONED,
+    )
+
+    db.add(line)
+    db.commit()
+    db.refresh(line)
+
+    logger.info(f"Line created: {line.id} for Account {account_id}")
+    return line
+
+
+def get_lines_by_account(db: Session, account_id: int):
+    return db.query(Line).filter(Line.account_id == account_id).all()
+
+
+def update_line_status(db: Session, line_id: int, new_status: str):
+    line = db.query(Line).filter(Line.id == line_id).first()
+
+    if not line:
+        raise HTTPException(status_code=404, detail="Line not found")
+
+    if line.status == LineStatus.DELETED:
+        raise HTTPException(status_code=400, detail="Cannot update a deleted line")
+
+    if new_status == LineStatus.ACTIVE and line.status == LineStatus.DELETED:
+        raise HTTPException(status_code=400, detail="Cannot activate deleted line")
+
+    line.status = new_status
+    db.commit()
+    db.refresh(line)
+
+    logger.info(f"Line status updated: Line {line.id} -> {new_status}")
+    return line
+
+
+def delete_line(db: Session, line_id: int):
+    line = db.query(Line).filter(Line.id == line_id).first()
+
+    if not line:
+        raise HTTPException(status_code=404, detail="Line not found")
+
+    line.status = LineStatus.DELETED
+    db.commit()
+
+    logger.info(f"Line deleted: Line {line.id}")
+    return line
