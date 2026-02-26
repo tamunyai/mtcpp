@@ -23,7 +23,7 @@ def authenticate_user(db: Session, username: str, password: str):
 
 def generate_session(db: Session, user: User):
     access_token, access_expiry = create_access_token(
-        data={"sub": user.username, "role": user.role},
+        data={"sub": user.username, "role": user.role.value},
         expires_delta=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
     )
 

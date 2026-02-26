@@ -4,6 +4,7 @@ from jose import JWTError
 
 from app.core.exceptions import ForbiddenException, UnauthorizedException
 from app.core.security import decode_token
+from app.schemas.user import UserRole
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
@@ -23,9 +24,15 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         raise UnauthorizedException(detail="Invalid token")
 
 
-def require_role(required_role: str):
+def require_role(required_role: UserRole):
     def role_checker(user=Depends(get_current_user)):
-        if user["role"] != required_role:
+        try:
+            user_role = UserRole(user["role"])
+
+        except Exception:
+            raise UnauthorizedException(detail="Invalid token role")
+
+        if user_role != required_role:
             raise ForbiddenException(detail="Insufficient permissions")
 
         return user
