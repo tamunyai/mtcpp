@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.core.exceptions import BadRequestException, NotFoundException
 from app.core.logging import get_logger
+from app.core.state import can_transition, is_commissionable
 from app.models.account import Account
 from app.models.line import Line
 from app.schemas.line import LineCreate, LineStatus
@@ -42,12 +43,11 @@ def update_line_status(db: Session, line_id: UUID, new_status: str):
 
     if not line:
         raise NotFoundException(detail="Line not found")
-
-    if line.status == LineStatus.DELETED:
-        raise BadRequestException(detail="Cannot update a deleted line")
-
-    if new_status == LineStatus.ACTIVE and line.status == LineStatus.DELETED:
-        raise BadRequestException(detail="Cannot activate deleted line")
+    # Validate allowed state transition centrally
+    if not can_transition(line.status, new_status):
+        raise BadRequestException(
+            detail=f"Invalid status transition: {line.status} -> {new_status}"
+        )
 
     line.status = new_status
     db.commit()
@@ -76,20 +76,20 @@ def commission_line(db: Session, line_id: UUID):
     if not line:
         raise NotFoundException(detail="Line not found")
 
-    # Validation rules
-    if line.status == LineStatus.ACTIVE:
-        raise BadRequestException(detail="Line is already active")
-
-    if line.status == LineStatus.DELETED:
-        raise BadRequestException(detail="Cannot commission deleted line")
-
-    if line.status != LineStatus.PROVISIONED:
+    # Only lines in PROVISIONED state may be commissioned
+    if not is_commissionable(line.status):
         raise BadRequestException(detail=f"Cannot commission line in status {line.status}")
 
     logger.info(f"Commissioning started for Line {line.id}")
 
     # Optional delay (simulate provisioning)
     time.sleep(2)
+
+    # Transition to ACTIVE
+    if not can_transition(line.status, LineStatus.ACTIVE):
+        raise BadRequestException(
+            detail=f"Invalid status transition during commission: {line.status} -> ACTIVE"
+        )
 
     line.status = LineStatus.ACTIVE
     db.commit()
