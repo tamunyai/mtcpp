@@ -5,12 +5,13 @@ from sqlalchemy.orm import Session
 from app.core.exceptions import NotFoundException
 from app.core.logging import get_logger
 from app.models.account import Account
-from app.schemas.account import AccountCreate, AccountUpdate
+from app.schemas.account import AccountCreate, AccountResponse, AccountUpdate
+from app.services.audit_service import record_audit
 
 logger = get_logger()
 
 
-def create_account(db: Session, account_data: AccountCreate):
+def create_account(db: Session, account_data: AccountCreate, actor: dict | str | None = None):
     account = Account(
         full_name=account_data.full_name,
         email=account_data.email,
@@ -22,6 +23,13 @@ def create_account(db: Session, account_data: AccountCreate):
     db.refresh(account)
 
     logger.info(f"Account created: {account.id} ({account.email})")
+
+    try:
+        new = AccountResponse.model_validate(account).model_dump()
+        record_audit(db, actor, "create_account", "account", str(account.id), old=None, new=new)
+    except Exception:
+        logger.debug("Failed to record audit for account creation")
+
     return account
 
 
@@ -38,8 +46,15 @@ def get_account_by_id(db: Session, account_id: UUID):
     return account
 
 
-def update_account(db: Session, account_id: UUID, account_data: AccountUpdate):
+def update_account(
+    db: Session, account_id: UUID, account_data: AccountUpdate, actor: dict | str | None = None
+):
     account = get_account_by_id(db, account_id)
+
+    try:
+        old = AccountResponse.model_validate(account).model_dump()
+    except Exception:
+        old = None
 
     for field, value in account_data.model_dump(exclude_unset=True).items():
         setattr(account, field, value)
@@ -48,4 +63,11 @@ def update_account(db: Session, account_id: UUID, account_data: AccountUpdate):
     db.refresh(account)
 
     logger.info(f"Account updated: {account.id}")
+
+    try:
+        new = AccountResponse.model_validate(account).model_dump()
+        record_audit(db, actor, "update_account", "account", str(account.id), old=old, new=new)
+    except Exception:
+        logger.debug("Failed to record audit for account update")
+
     return account

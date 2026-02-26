@@ -26,7 +26,7 @@ def create_new_line(
     db: Session = Depends(get_db),
     user=Depends(require_role(UserRole.ADMIN)),
 ):
-    created = create_line(db, account_id, line)
+    created = create_line(db, account_id, line, actor=user)
     return LineResponse.model_validate(created)
 
 
@@ -45,7 +45,7 @@ def change_line_status(
     db: Session = Depends(get_db),
     user=Depends(require_role(UserRole.ADMIN)),
 ):
-    updated = update_line_status(db, line_id, status_update.status)
+    updated = update_line_status(db, line_id, status_update.status, actor=user)
     return LineResponse.model_validate(updated)
 
 
@@ -53,7 +53,7 @@ def change_line_status(
 def remove_line(
     line_id: UUID, db: Session = Depends(get_db), user=Depends(require_role(UserRole.ADMIN))
 ):
-    deleted = delete_line(db, line_id)
+    deleted = delete_line(db, line_id, actor=user)
     return LineResponse.model_validate(deleted)
 
 
@@ -61,5 +61,5 @@ def remove_line(
 def commission_line_endpoint(
     line_id: UUID, db: Session = Depends(get_db), user=Depends(require_role(UserRole.ADMIN))
 ):
-    commissioned = commission_line(db, line_id)
+    commissioned = commission_line(db, line_id, actor=user)
     return LineResponse.model_validate(commissioned)

@@ -24,7 +24,7 @@ def create_new_account(
     db: Session = Depends(get_db),
     user=Depends(require_role(UserRole.ADMIN)),
 ):
-    created = create_account(db, account)
+    created = create_account(db, account, actor=user)
     return AccountResponse.model_validate(created)
 
 
@@ -47,5 +47,5 @@ def update_existing_account(
     db: Session = Depends(get_db),
     user=Depends(require_role(UserRole.ADMIN)),
 ):
-    updated = update_account(db, account_id, account)
+    updated = update_account(db, account_id, account, actor=user)
     return AccountResponse.model_validate(updated)
