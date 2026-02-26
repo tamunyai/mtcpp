@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from uuid import UUID, uuid4
 
 from sqlalchemy import DateTime, String
 from sqlalchemy.orm import Mapped, mapped_column
@@ -10,7 +11,7 @@ from app.schemas.account import AccountStatus
 class Account(Base):
     __tablename__ = "accounts"
 
-    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, index=True, default=uuid4)
     full_name: Mapped[str] = mapped_column(String, nullable=False)
     email: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False)
     phone: Mapped[str] = mapped_column(String, nullable=False)

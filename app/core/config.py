@@ -6,13 +6,14 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     # App Settings
-    APP_NAME: str = "Mini Telecom Commissioning & Provisioning Platform"
+    APP_NAME: str = "Mini Telecom Commissioning & Provisioning Platform - API"
     DEBUG: bool = False
 
     # Security & JWT
     SECRET_KEY: str = "super-secret-key"
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
+    REFRESH_TOKEN_EXPIRE_MINUTES: int = 24 * 60  # 1 day
 
     # Pydantic Configuration
     model_config = {

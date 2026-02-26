@@ -27,6 +27,7 @@ def require_role(required_role: str):
     def role_checker(user=Depends(get_current_user)):
         if user["role"] != required_role:
             raise ForbiddenException(detail="Insufficient permissions")
+
         return user
 
     return role_checker
