@@ -7,6 +7,10 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     # App Settings
     APP_NAME: str = "Mini Telecom Commissioning & Provisioning Platform - API"
+    APP_VERSION: str = "0.1.0"
+    APP_DESCRIPTION: str = (
+        "Lightweight provisioning API for accounts and service lines (commissioning simulation)."
+    )
     DEBUG: bool = False
 
     # Security & JWT

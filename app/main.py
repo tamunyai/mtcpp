@@ -34,7 +34,13 @@ async def lifespan(app: FastAPI):
     logger.info("Shutting down backend services...")
 
 
-app = FastAPI(title=settings.APP_NAME, lifespan=lifespan, debug=settings.DEBUG)
+app = FastAPI(
+    title=settings.APP_NAME,
+    version=settings.APP_VERSION,
+    description=settings.APP_DESCRIPTION,
+    lifespan=lifespan,
+    debug=settings.DEBUG,
+)
 
 
 @app.exception_handler(AppException)
