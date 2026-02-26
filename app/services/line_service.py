@@ -49,7 +49,7 @@ def get_lines_by_account(db: Session, account_id: UUID):
 
 
 def update_line_status(
-    db: Session, line_id: UUID, new_status: str, actor: dict | str | None = None
+    db: Session, line_id: UUID, new_status: LineStatus, actor: dict | str | None = None
 ):
     line = db.query(Line).filter(Line.id == line_id).first()
 
