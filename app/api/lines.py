@@ -26,14 +26,16 @@ def create_new_line(
     db: Session = Depends(get_db),
     user=Depends(require_role(UserRole.ADMIN)),
 ):
-    return create_line(db, account_id, line)
+    created = create_line(db, account_id, line)
+    return LineResponse.model_validate(created)
 
 
 @router.get("/accounts/{account_id}/lines", response_model=List[LineResponse])
 def list_lines_for_account(
     account_id: UUID, db: Session = Depends(get_db), user=Depends(get_current_user)
 ):
-    return get_lines_by_account(db, account_id)
+    lines = get_lines_by_account(db, account_id)
+    return [LineResponse.model_validate(line) for line in lines]
 
 
 @router.patch("/lines/{line_id}/status", response_model=LineResponse)
@@ -43,18 +45,21 @@ def change_line_status(
     db: Session = Depends(get_db),
     user=Depends(require_role(UserRole.ADMIN)),
 ):
-    return update_line_status(db, line_id, status_update.status)
+    updated = update_line_status(db, line_id, status_update.status)
+    return LineResponse.model_validate(updated)
 
 
 @router.delete("/lines/{line_id}", response_model=LineResponse)
 def remove_line(
     line_id: UUID, db: Session = Depends(get_db), user=Depends(require_role(UserRole.ADMIN))
 ):
-    return delete_line(db, line_id)
+    deleted = delete_line(db, line_id)
+    return LineResponse.model_validate(deleted)
 
 
 @router.post("/lines/{line_id}/commission", response_model=LineResponse)
 def commission_line_endpoint(
     line_id: UUID, db: Session = Depends(get_db), user=Depends(require_role(UserRole.ADMIN))
 ):
-    return commission_line(db, line_id)
+    commissioned = commission_line(db, line_id)
+    return LineResponse.model_validate(commissioned)

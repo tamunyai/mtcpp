@@ -24,17 +24,20 @@ def create_new_account(
     db: Session = Depends(get_db),
     user=Depends(require_role(UserRole.ADMIN)),
 ):
-    return create_account(db, account)
+    created = create_account(db, account)
+    return AccountResponse.model_validate(created)
 
 
 @router.get("/", response_model=List[AccountResponse])
 def list_accounts(db: Session = Depends(get_db), user=Depends(get_current_user)):
-    return get_accounts(db)
+    accounts = get_accounts(db)
+    return [AccountResponse.model_validate(a) for a in accounts]
 
 
 @router.get("/{account_id}", response_model=AccountResponse)
 def get_account(account_id: UUID, db: Session = Depends(get_db), user=Depends(get_current_user)):
-    return get_account_by_id(db, account_id)
+    account = get_account_by_id(db, account_id)
+    return AccountResponse.model_validate(account)
 
 
 @router.put("/{account_id}", response_model=AccountResponse)
@@ -44,4 +47,5 @@ def update_existing_account(
     db: Session = Depends(get_db),
     user=Depends(require_role(UserRole.ADMIN)),
 ):
-    return update_account(db, account_id, account)
+    updated = update_account(db, account_id, account)
+    return AccountResponse.model_validate(updated)
