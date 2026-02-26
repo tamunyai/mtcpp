@@ -1,6 +1,7 @@
 services:
   api:
-    build: .
+    build:
+      context: .
     container_name: mtcpp-api
     ports:
       - "8000:8000"

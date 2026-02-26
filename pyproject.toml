@@ -11,9 +11,15 @@ extend-exclude = '''
 '''
 
 [tool.ruff]
-# Enable Pyflakes (F) and Isort (I)
-select = ["E", "F", "I"]
 fixable = ["ALL"]
+select = [
+    "E",  # pycodestyle errors
+    "F",  # pyflakes
+    "I",  # isort
+]
+ignore = [
+    "E501",  # line too long, handled by black
+]
 exclude = [
     ".git",
     ".venv",
