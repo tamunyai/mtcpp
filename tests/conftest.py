@@ -24,12 +24,16 @@ def init_db():
 
     try:
         admin = User(
-            username="admin",
-            password_hash=hash_password("admin123"),
-            role=UserRole.ADMIN,
+            username="admin_test", password_hash=hash_password("admin123"), role=UserRole.ADMIN
+        )
+        operator = User(
+            username="operator_test",
+            password_hash=hash_password("operator123"),
+            role=UserRole.OPERATOR,
         )
 
         db.add(admin)
+        db.add(operator)
         db.commit()
 
     finally:
@@ -71,11 +75,25 @@ def client(db):
 
 @pytest.fixture
 def admin_token(client):
-    response = client.post("/auth/login", json={"username": "admin", "password": "admin123"})
+    response = client.post("/auth/login", json={"username": "admin_test", "password": "admin123"})
     return response.json()["access_token"]
 
 
 @pytest.fixture
-def auth_client(client, admin_token):
+def admin_client(client, admin_token):
     client.headers.update({"Authorization": f"Bearer {admin_token}"})
+    return client
+
+
+@pytest.fixture
+def operator_token(client):
+    response = client.post(
+        "/auth/login", json={"username": "operator_test", "password": "operator123"}
+    )
+    return response.json()["access_token"]
+
+
+@pytest.fixture
+def operator_client(client, operator_token):
+    client.headers.update({"Authorization": f"Bearer {operator_token}"})
     return client
