@@ -1,4 +1,5 @@
 from typing import List
+from uuid import UUID
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
@@ -32,13 +33,13 @@ def list_accounts(db: Session = Depends(get_db), user=Depends(get_current_user))
 
 
 @router.get("/{account_id}", response_model=AccountResponse)
-def get_account(account_id: int, db: Session = Depends(get_db), user=Depends(get_current_user)):
+def get_account(account_id: UUID, db: Session = Depends(get_db), user=Depends(get_current_user)):
     return get_account_by_id(db, account_id)
 
 
 @router.put("/{account_id}", response_model=AccountResponse)
 def update_existing_account(
-    account_id: int,
+    account_id: UUID,
     account: AccountUpdate,
     db: Session = Depends(get_db),
     user=Depends(require_role(UserRole.ADMIN)),

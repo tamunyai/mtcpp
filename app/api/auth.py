@@ -1,5 +1,4 @@
 from datetime import datetime
-from uuid import UUID
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
@@ -8,7 +7,7 @@ from app.core.exceptions import NotFoundException, UnauthorizedException
 from app.db.session import get_db
 from app.models.auth import RefreshToken
 from app.models.user import User
-from app.schemas.auth import LoginRequest, RefreshRequest, SessionResponse
+from app.schemas.auth import LoginRequest, RefreshTokenRequest, SessionResponse
 from app.services.auth_service import authenticate_user, generate_session
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -25,10 +24,10 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/refresh", response_model=SessionResponse)
-def refresh(request: RefreshRequest, db: Session = Depends(get_db)):
+def refresh(request: RefreshTokenRequest, db: Session = Depends(get_db)):
     refresh_token = (
         db.query(RefreshToken)
-        .filter(RefreshToken.id == UUID(request.refresh_token), RefreshToken.revoked == 0)
+        .filter(RefreshToken.id == request.refresh_token, RefreshToken.revoked == 0)
         .first()
     )
 

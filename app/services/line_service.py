@@ -1,4 +1,5 @@
 import time
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -11,7 +12,7 @@ from app.schemas.line import LineCreate, LineStatus
 logger = get_logger()
 
 
-def create_line(db: Session, account_id: int, line_data: LineCreate):
+def create_line(db: Session, account_id: UUID, line_data: LineCreate):
     account = db.query(Account).filter(Account.id == account_id).first()
 
     if not account:
@@ -32,11 +33,11 @@ def create_line(db: Session, account_id: int, line_data: LineCreate):
     return line
 
 
-def get_lines_by_account(db: Session, account_id: int):
+def get_lines_by_account(db: Session, account_id: UUID):
     return db.query(Line).filter(Line.account_id == account_id).all()
 
 
-def update_line_status(db: Session, line_id: int, new_status: str):
+def update_line_status(db: Session, line_id: UUID, new_status: str):
     line = db.query(Line).filter(Line.id == line_id).first()
 
     if not line:
@@ -56,7 +57,7 @@ def update_line_status(db: Session, line_id: int, new_status: str):
     return line
 
 
-def delete_line(db: Session, line_id: int):
+def delete_line(db: Session, line_id: UUID):
     line = db.query(Line).filter(Line.id == line_id).first()
 
     if not line:
@@ -69,7 +70,7 @@ def delete_line(db: Session, line_id: int):
     return line
 
 
-def commission_line(db: Session, line_id: int):
+def commission_line(db: Session, line_id: UUID):
     line = db.query(Line).filter(Line.id == line_id).first()
 
     if not line:

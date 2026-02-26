@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import NotFoundException
@@ -27,7 +29,7 @@ def get_accounts(db: Session):
     return db.query(Account).all()
 
 
-def get_account_by_id(db: Session, account_id: int):
+def get_account_by_id(db: Session, account_id: UUID):
     account = db.query(Account).filter(Account.id == account_id).first()
 
     if not account:
@@ -36,7 +38,7 @@ def get_account_by_id(db: Session, account_id: int):
     return account
 
 
-def update_account(db: Session, account_id: int, account_data: AccountUpdate):
+def update_account(db: Session, account_id: UUID, account_data: AccountUpdate):
     account = get_account_by_id(db, account_id)
 
     for field, value in account_data.model_dump(exclude_unset=True).items():

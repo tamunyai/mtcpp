@@ -1,5 +1,6 @@
 from datetime import datetime
 from enum import Enum
+from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
@@ -23,8 +24,8 @@ class LineUpdateStatus(BaseModel):
 class LineResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    id: int
-    account_id: int
+    id: UUID
+    account_id: UUID
     msisdn: str
     plan_name: str
     status: LineStatus

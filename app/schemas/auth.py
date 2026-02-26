@@ -1,4 +1,5 @@
 from typing import Optional
+from uuid import UUID
 
 from pydantic import BaseModel
 
@@ -10,17 +11,13 @@ class LoginRequest(BaseModel):
     password: str
 
 
-class LogoutRequest(BaseModel):
-    refresh_token: str
-
-
-class RefreshRequest(BaseModel):
-    refresh_token: str
+class RefreshTokenRequest(BaseModel):
+    refresh_token: UUID
 
 
 class SessionResponse(BaseModel):
     access_token: str
-    refresh_token: str
+    refresh_token: UUID
     expires_in: int
     expires_at: Optional[int] = None
     token_type: str = "bearer"

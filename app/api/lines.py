@@ -1,4 +1,5 @@
 from typing import List
+from uuid import UUID
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
@@ -20,7 +21,7 @@ router = APIRouter(tags=["Lines"])
 
 @router.post("/accounts/{account_id}/lines", response_model=LineResponse)
 def create_new_line(
-    account_id: int,
+    account_id: UUID,
     line: LineCreate,
     db: Session = Depends(get_db),
     user=Depends(require_role(UserRole.ADMIN)),
@@ -30,14 +31,14 @@ def create_new_line(
 
 @router.get("/accounts/{account_id}/lines", response_model=List[LineResponse])
 def list_lines_for_account(
-    account_id: int, db: Session = Depends(get_db), user=Depends(get_current_user)
+    account_id: UUID, db: Session = Depends(get_db), user=Depends(get_current_user)
 ):
     return get_lines_by_account(db, account_id)
 
 
 @router.patch("/lines/{line_id}/status", response_model=LineResponse)
 def change_line_status(
-    line_id: int,
+    line_id: UUID,
     status_update: LineUpdateStatus,
     db: Session = Depends(get_db),
     user=Depends(require_role(UserRole.ADMIN)),
@@ -47,13 +48,13 @@ def change_line_status(
 
 @router.delete("/lines/{line_id}", response_model=LineResponse)
 def remove_line(
-    line_id: int, db: Session = Depends(get_db), user=Depends(require_role(UserRole.ADMIN))
+    line_id: UUID, db: Session = Depends(get_db), user=Depends(require_role(UserRole.ADMIN))
 ):
     return delete_line(db, line_id)
 
 
 @router.post("/lines/{line_id}/commission", response_model=LineResponse)
 def commission_line_endpoint(
-    line_id: int, db: Session = Depends(get_db), user=Depends(require_role(UserRole.ADMIN))
+    line_id: UUID, db: Session = Depends(get_db), user=Depends(require_role(UserRole.ADMIN))
 ):
     return commission_line(db, line_id)
