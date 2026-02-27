@@ -1,7 +1,7 @@
 from typing import List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import get_current_user, require_role
@@ -29,8 +29,10 @@ def create_new_account(
 
 
 @router.get("/", response_model=List[AccountResponse])
-def list_accounts(db: Session = Depends(get_db), user=Depends(get_current_user)):
-    accounts = get_accounts(db)
+def list_accounts(
+    db: Session = Depends(get_db), user=Depends(get_current_user), limit: int = Query(100, ge=1)
+):
+    accounts = get_accounts(db, limit=limit)
     return [AccountResponse.model_validate(a) for a in accounts]
 
 

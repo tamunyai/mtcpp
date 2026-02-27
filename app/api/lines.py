@@ -1,7 +1,7 @@
 from typing import List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import get_current_user, require_role
@@ -32,9 +32,12 @@ def create_new_line(
 
 @router.get("/accounts/{account_id}/lines", response_model=List[LineResponse])
 def list_lines_for_account(
-    account_id: UUID, db: Session = Depends(get_db), user=Depends(get_current_user)
+    account_id: UUID,
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user),
+    limit: int = Query(100, ge=1),
 ):
-    lines = get_lines_by_account(db, account_id)
+    lines = get_lines_by_account(db, account_id, limit=limit)
     return [LineResponse.model_validate(line) for line in lines]
 
 

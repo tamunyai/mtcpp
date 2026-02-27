@@ -33,8 +33,8 @@ def create_account(db: Session, account_data: AccountCreate, actor: dict | str |
     return account
 
 
-def get_accounts(db: Session):
-    return db.query(Account).all()
+def get_accounts(db: Session, limit: int = 100):
+    return db.query(Account).limit(limit).all()
 
 
 def get_account_by_id(db: Session, account_id: UUID):

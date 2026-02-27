@@ -44,8 +44,8 @@ def create_line(
     return line
 
 
-def get_lines_by_account(db: Session, account_id: UUID):
-    return db.query(Line).filter(Line.account_id == account_id).all()
+def get_lines_by_account(db: Session, account_id: UUID, limit: int = 100):
+    return db.query(Line).filter(Line.account_id == account_id).limit(limit).all()
 
 
 def update_line_status(
