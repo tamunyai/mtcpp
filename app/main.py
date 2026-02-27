@@ -25,7 +25,7 @@ async def lifespan(app: FastAPI):
         Base.metadata.create_all(bind=engine)
 
         if settings.DEV:
-            init_db()  # Seed Admin/Operator users
+            init_db()
             logger.info("Database initialized and seeded successfully.")
 
         else:

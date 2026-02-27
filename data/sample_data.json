@@ -1,0 +1,25 @@
+{
+  "users": [
+    { "username": "admin", "password": "admin123", "role": "ADMIN" },
+    { "username": "operator", "password": "operator123", "role": "OPERATOR" }
+  ],
+  "accounts": [
+    {
+      "full_name": "Alice Example",
+      "email": "alice@example.com",
+      "phone": "+15550000001",
+      "status": "ACTIVE",
+      "lines": [
+        { "msisdn": "+15551110001", "plan_name": "Basic" },
+        { "msisdn": "+15551110002", "plan_name": "Pro" }
+      ]
+    },
+    {
+      "full_name": "Bob Example",
+      "email": "bob@example.com",
+      "phone": "+15550000002",
+      "status": "ACTIVE",
+      "lines": [{ "msisdn": "+15551110003", "plan_name": "Basic" }]
+    }
+  ]
+}
