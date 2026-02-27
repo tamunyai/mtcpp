@@ -40,3 +40,28 @@ def test_invalid_email_account(admin_client):
     )
 
     assert acc_response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+
+
+def test_invalid_uuid_returns_422(admin_client):
+    acc_response = admin_client.get("/accounts/not-a-uuid")
+
+    assert acc_response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+
+
+def test_operator_can_list_accounts(operator_client):
+    acc_response = operator_client.get("/accounts")
+
+    assert acc_response.status_code == status.HTTP_200_OK
+
+
+def test_operator_cannot_update_account(operator_client, admin_client):
+    # Create an account as admin
+    payload = {"full_name": "To Update", "email": "to-update@example.com", "phone": "000"}
+    acc_response = admin_client.post("/accounts", json=payload)
+
+    assert acc_response.status_code == status.HTTP_200_OK
+    account_id = acc_response.json()["id"]
+
+    # Operator attempts to update
+    acc_response = operator_client.put(f"/accounts/{account_id}", json={"full_name": "Hacked"})
+    assert acc_response.status_code == status.HTTP_403_FORBIDDEN
