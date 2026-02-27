@@ -24,8 +24,8 @@ logger.add(
 # File logging
 logger.add(
     settings.LOG_FILE,
-    rotation="1 MB",
-    retention="7 days",
+    rotation="10 MB",
+    retention="30 days",
     compression="zip",
     level="INFO",
     serialize=True,
