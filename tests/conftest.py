@@ -80,12 +80,6 @@ def admin_token(client):
 
 
 @pytest.fixture
-def admin_client(client, admin_token):
-    client.headers.update({"Authorization": f"Bearer {admin_token}"})
-    return client
-
-
-@pytest.fixture
 def operator_token(client):
     response = client.post(
         "/auth/login", json={"username": "operator_test", "password": "operator123"}
@@ -94,6 +88,14 @@ def operator_token(client):
 
 
 @pytest.fixture
-def operator_client(client, operator_token):
-    client.headers.update({"Authorization": f"Bearer {operator_token}"})
-    return client
+def admin_client(admin_token):
+    with TestClient(app) as c:
+        c.headers.update({"Authorization": f"Bearer {admin_token}"})
+        yield c
+
+
+@pytest.fixture
+def operator_client(operator_token):
+    with TestClient(app) as c:
+        c.headers.update({"Authorization": f"Bearer {operator_token}"})
+        yield c
