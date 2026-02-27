@@ -1,8 +1,9 @@
 from uuid import UUID
 
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.core.exceptions import NotFoundException
+from app.core.exceptions import ConflictException, NotFoundException
 from app.core.logging import get_logger
 from app.models.account import Account
 from app.schemas.account import AccountCreate, AccountResponse, AccountUpdate
@@ -18,9 +19,15 @@ def create_account(db: Session, account_data: AccountCreate, actor: dict | str |
         phone=account_data.phone,
         status=account_data.status,
     )
+
     db.add(account)
-    db.commit()
-    db.refresh(account)
+
+    try:
+        db.commit()
+        db.refresh(account)
+    except IntegrityError as exc:
+        db.rollback()
+        raise ConflictException(detail="Account with this email already exists") from exc
 
     logger.info(f"Account created: {account.id} ({account.email})")
 

@@ -52,8 +52,16 @@ def db():
     session = TestingSessionLocal(bind=connection)
     yield session
 
+    # Ensure DB transaction is rolled back before closing the session/connection.
+    try:
+        if transaction.is_active:
+            transaction.rollback()
+    except Exception:
+        # Ignore errors during rollback to avoid SAWarning when transaction
+        # is already deassociated from the connection.
+        pass
+
     session.close()
-    transaction.rollback()
     connection.close()
 
 

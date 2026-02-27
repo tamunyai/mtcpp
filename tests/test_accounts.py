@@ -20,6 +20,19 @@ def test_create_account(admin_client):
     assert data["status"] == AccountStatus.ACTIVE.value
 
 
+def test_create_account_duplicate_email(admin_client):
+    payload = {"full_name": "Duplicate User", "email": "dup@example.com", "phone": "123"}
+
+    first_acc_response = admin_client.post("/accounts", json=payload)
+
+    assert first_acc_response.status_code == status.HTTP_200_OK
+
+    # Second request with same email
+    second_acc_response = admin_client.post("/accounts", json=payload)
+
+    assert second_acc_response.status_code == status.HTTP_409_CONFLICT
+
+
 def test_invalid_email_account(admin_client):
     acc_response = admin_client.post(
         "/accounts",

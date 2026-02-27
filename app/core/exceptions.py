@@ -24,3 +24,8 @@ class ForbiddenException(AppException):
 class UnauthorizedException(AppException):
     def __init__(self, detail="Unauthorized"):
         super().__init__(status.HTTP_401_UNAUTHORIZED, detail)
+
+
+class ConflictException(AppException):
+    def __init__(self, detail="Conflict"):
+        super().__init__(status.HTTP_409_CONFLICT, detail)
