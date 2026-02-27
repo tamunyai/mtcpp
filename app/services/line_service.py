@@ -1,9 +1,14 @@
 import time
 from uuid import UUID
 
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.core.exceptions import BadRequestException, NotFoundException
+from app.core.exceptions import (
+    BadRequestException,
+    ConflictException,
+    NotFoundException,
+)
 from app.core.logging import get_logger
 from app.core.state import can_transition, is_commissionable
 from app.models.account import Account
@@ -30,8 +35,15 @@ def create_line(
     )
 
     db.add(line)
-    db.commit()
-    db.refresh(line)
+
+    try:
+        db.commit()
+        db.refresh(line)
+    except IntegrityError as exc:
+        db.rollback()
+        raise ConflictException(
+            detail="Line with this MSISDN already exists for the account"
+        ) from exc
 
     logger.info(f"Line created: {line.id} for Account {account_id}")
 
@@ -45,6 +57,11 @@ def create_line(
 
 
 def get_lines_by_account(db: Session, account_id: UUID, limit: int = 100):
+    account = db.query(Account).filter(Account.id == account_id).first()
+
+    if not account:
+        raise NotFoundException(detail="Account not found")
+
     return db.query(Line).filter(Line.account_id == account_id).limit(limit).all()
 
 
@@ -59,7 +76,7 @@ def update_line_status(
     # Validate allowed state transition centrally
     if not can_transition(line.status, new_status):
         raise BadRequestException(
-            detail=f"Invalid status transition: {line.status} -> {new_status}"
+            detail=f"Invalid status transition: {line.status.value} -> {new_status.value}"
         )
 
     try:
@@ -114,7 +131,7 @@ def commission_line(db: Session, line_id: UUID, actor: dict | str | None = None)
 
     # Only lines in PROVISIONED state may be commissioned
     if not is_commissionable(line.status):
-        raise BadRequestException(detail=f"Cannot commission line in status {line.status}")
+        raise BadRequestException(detail=f"Cannot commission line in status {line.status.value}")
 
     try:
         old = LineResponse.model_validate(line).model_dump()
@@ -129,7 +146,7 @@ def commission_line(db: Session, line_id: UUID, actor: dict | str | None = None)
     # Transition to ACTIVE
     if not can_transition(line.status, LineStatus.ACTIVE):
         raise BadRequestException(
-            detail=f"Invalid status transition during commission: {line.status} -> ACTIVE"
+            detail=f"Invalid status transition during commission: {line.status.value} -> ACTIVE"
         )
 
     line.status = LineStatus.ACTIVE
