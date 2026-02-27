@@ -1,0 +1,1966 @@
+{
+  "info": {
+    "_postman_id": "1e95cfe5-6b97-4e5b-a7fb-6d4d98d1bc15",
+    "name": "Mini Telecom Commissioning & Provisioning Platform - API",
+    "description": "# Mini Telecom Commissioning & Provisioning Platform - API\n\nA lightweight **service provisioning & commissioning REST API** built with FastAPI, designed to manage telecom accounts and service lines from creation through to full commissioning.\n\n---\n\n## Authentication\n\nThis API uses **OAuth2 Password Flow** (Bearer token). To authenticate:\n\n1. Call `POST /auth/login` with your `username` and `password`.\n    \n2. Copy the returned `access_token`.\n    \n3. Pass it as a **Bearer token** in the `Authorization` header for all protected endpoints:\n    \n\n```\nAuthorization: Bearer <access_token>\n\n ```\n\n> **Public endpoints** (no auth required): `GET /`, `GET /health`, `POST /auth/login`, `POST /auth/refresh` \n  \n\n---\n\n## Base URL\n\n| Environment | URL |\n| --- | --- |\n| Local Development | `http://localhost:8000` |\n\nSet the `{{baseUrl}}` collection variable to switch environments.\n\n---\n\n## Resources\n\n| Resource | Description |\n| --- | --- |\n| **Auth** | Login and token refresh |\n| **Accounts** | Customer account lifecycle management |\n| **Lines** | SIM/service line management per account |\n| **Commissioning** | Activate and commission a provisioned line |\n\n---\n\n## Typical Workflow\n\n```\n1. POST /auth/login            → Get access token\n2. POST /accounts/             → Create a customer account\n3. POST /accounts/{id}/lines   → Add a service line to the account\n4. POST /lines/{id}/commission → Commission (activate) the line\n\n ```\n\n---\n\n## Account Status Values\n\n| Status | Meaning |\n| --- | --- |\n| `ACTIVE` | Account is active and in good standing |\n| `SUSPENDED` | Account is temporarily suspended |\n| `CLOSED` | Account has been closed |\n\n## Line Status Values\n\n| Status | Meaning |\n| --- | --- |\n| `PROVISIONED` | Line is provisioned and ready to commission |\n| `ACTIVE` | Line is commissioned and live |\n| `SUSPENDED` | Line is temporarily suspended |\n| `DELETED` | Line has been removed |\n\n---\n\n## Error Responses\n\n| Status Code | Meaning |\n| --- | --- |\n| `401 Unauthorized` | Missing or invalid Bearer token |\n| `404 Not Found` | Resource with given ID does not exist |\n| `422 Unprocessable Entity` | Request body failed validation |\n| `500 Internal Server Error` | Unexpected server-side error |",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "52594275",
+    "_collection_link": "https://go.postman.co/collection/52594275-1e95cfe5-6b97-4e5b-a7fb-6d4d98d1bc15?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "/",
+      "item": [
+        {
+          "name": "Root",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                ""
+              ]
+            },
+            "description": "Returns a welcome message confirming the API is running. Useful for basic connectivity checks.\n\n**Authentication:** None required (public endpoint)\n\n**Responses:**\n\n- `200 OK` - Returns a welcome/status message from the API root."
+          },
+          "response": [
+            {
+              "name": "Successful Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "//",
+                  "path": [
+                    "",
+                    ""
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\r\n  \"app\": \"Mini Telecom Commissioning & Provisioning Platform - API\",\r\n  \"version\": \"0.1.0\",\r\n  \"docs\": \"/docs\",\r\n  \"status\": \"string\"\r\n}"
+            }
+          ]
+        }
+      ],
+      "description": "## Root\n\nThe API root endpoint. Returns basic API metadata including the service name and version. Useful for confirming the API is reachable.\n\n**No authentication required.**",
+      "auth": {
+        "type": "noauth"
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "Checks the health and availability of the API service. Typically used by load balancers, monitoring tools, or CI/CD pipelines.\n\n**Authentication:** None required (public endpoint)\n\n**Responses:**\n\n- `200 OK` - Returns `{\"status\": \"healthy\"}` or similar, indicating the service is operational.\n    \n- `503 Service Unavailable` - Service is degraded or unavailable."
+          },
+          "response": [
+            {
+              "name": "Successful Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/health",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "health"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\r\n  \"status\": \"string\",\r\n  \"database\": \"string\"\r\n}"
+            }
+          ]
+        }
+      ],
+      "description": "## Health Check\n\nReturns the current health status of the API service. Use this endpoint to verify the server is running and responsive.\n\n**No authentication required.**",
+      "auth": {
+        "type": "noauth"
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "auth",
+      "item": [
+        {
+          "name": "login",
+          "item": [
+            {
+              "name": "Login",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "const data = pm.response.json();",
+                      "",
+                      "if (data.access_token) {",
+                      "    pm.collectionVariables.set(\"accessToken\", data.access_token);",
+                      "}",
+                      "",
+                      "if (data.refresh_token) {",
+                      "    pm.collectionVariables.set(\"refreshToken\", data.refresh_token);",
+                      "}",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "login"
+                  ]
+                },
+                "description": "Authenticates a user and returns an OAuth2 access token and refresh token.\n\n**Authentication:** None required (public endpoint)\n\n**Request Body:**\n\n- `username` (string, required) - The user's username or email address.\n    \n- `password` (string, required) - The user's password.\n    \n\n**Responses:**\n\n- `200 OK` - Returns `access_token`, `refresh_token`, and `token_type`.\n    \n- `401 Unauthorized` - Invalid credentials."
+              },
+              "response": [
+                {
+                  "name": "Successful Response",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"username\": \"string\",\n  \"password\": \"string\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/auth/login",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "auth",
+                        "login"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"access_token\": \"string\",\n  \"refresh_token\": \"4a15af60-abfe-db03-692e-27cc6a12f7ba\",\n  \"expires_in\": 7453,\n  \"user\": {\n    \"id\": \"0ead76f8-7ea9-4f41-c6c7-225596966fa4\",\n    \"username\": \"string\",\n    \"role\": \"string\"\n  },\n  \"expires_at\": null,\n  \"token_type\": \"bearer\"\n}"
+                },
+                {
+                  "name": "Validation Error",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"username\": \"string\",\n  \"password\": \"string\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/auth/login",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "auth",
+                        "login"
+                      ]
+                    }
+                  },
+                  "status": "Unprocessable Entity (WebDAV) (RFC 4918)",
+                  "code": 422,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        3474,\n        \"string\"\n      ],\n      \"msg\": \"string\",\n      \"type\": \"string\",\n      \"input\": \"\",\n      \"ctx\": {}\n    },\n    {\n      \"loc\": [\n        \"string\",\n        \"string\"\n      ],\n      \"msg\": \"string\",\n      \"type\": \"string\",\n      \"input\": \"\",\n      \"ctx\": {}\n    }\n  ]\n}"
+                }
+              ]
+            }
+          ],
+          "description": "## Login\n\nAuthenticates a user with `username` and `password` credentials and returns a JWT access token and refresh token."
+        },
+        {
+          "name": "refresh",
+          "item": [
+            {
+              "name": "Refresh",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "const data = pm.response.json();",
+                      "",
+                      "if (data.access_token) {",
+                      "    pm.collectionVariables.set(\"accessToken\", data.access_token);",
+                      "}",
+                      "",
+                      "if (data.refresh_token) {",
+                      "    pm.collectionVariables.set(\"refreshToken\", data.refresh_token);",
+                      "}"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"refresh_token\": \"{{refreshToken}}\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/refresh",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "refresh"
+                  ]
+                },
+                "description": "Issues a new access token using a valid refresh token, extending the user's session without requiring re-authentication.\n\n**Authentication:** Requires a valid `refresh_token` in the request body.\n\n**Request Body:**\n\n- `refresh_token` (string, required) - A previously issued refresh token.\n    \n\n**Responses:**\n\n- `200 OK` - Returns a new `access_token` and `token_type`.\n    \n- `401 Unauthorized` - Refresh token is invalid or expired."
+              },
+              "response": [
+                {
+                  "name": "Successful Response",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"refresh_token\": \"95683e3e-57be-50d6-0d9d-57c789963b4e\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/auth/refresh",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "auth",
+                        "refresh"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"access_token\": \"string\",\n  \"refresh_token\": \"4a15af60-abfe-db03-692e-27cc6a12f7ba\",\n  \"expires_in\": 7453,\n  \"user\": {\n    \"id\": \"0ead76f8-7ea9-4f41-c6c7-225596966fa4\",\n    \"username\": \"string\",\n    \"role\": \"string\"\n  },\n  \"expires_at\": null,\n  \"token_type\": \"bearer\"\n}"
+                },
+                {
+                  "name": "Validation Error",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"refresh_token\": \"95683e3e-57be-50d6-0d9d-57c789963b4e\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/auth/refresh",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "auth",
+                        "refresh"
+                      ]
+                    }
+                  },
+                  "status": "Unprocessable Entity (WebDAV) (RFC 4918)",
+                  "code": 422,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        3474,\n        \"string\"\n      ],\n      \"msg\": \"string\",\n      \"type\": \"string\",\n      \"input\": \"\",\n      \"ctx\": {}\n    },\n    {\n      \"loc\": [\n        \"string\",\n        \"string\"\n      ],\n      \"msg\": \"string\",\n      \"type\": \"string\",\n      \"input\": \"\",\n      \"ctx\": {}\n    }\n  ]\n}"
+                }
+              ]
+            }
+          ],
+          "description": "## Refresh Token\n\nExchanges a valid `refresh_token` for a new `access_token` without requiring the user to log in again.",
+          "auth": {
+            "type": "noauth"
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  ""
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  ""
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "description": "## Authentication\n\nHandles user login and token management. These endpoints are **public** - no Bearer token is required.\n\nUse `POST /auth/login` to obtain an `access_token` and `refresh_token`. When the access token expires, use `POST /auth/refresh` to get a new one without re-entering credentials.\n\n**Collection variables set by scripts in this folder:**\n\n- `{{authToken}}` - Bearer token for protected requests\n    \n- `{{refreshToken}}` - Token used to renew the access token"
+    },
+    {
+      "name": "accounts",
+      "item": [
+        {
+          "name": "{account_id}",
+          "item": [
+            {
+              "name": "lines",
+              "item": [
+                {
+                  "name": "Create New Line",
+                  "event": [
+                    {
+                      "listen": "test",
+                      "script": {
+                        "exec": [
+                          "const data = pm.response.json();\r",
+                          "\r",
+                          "if (data.id) {\r",
+                          "    pm.collectionVariables.set(\"lineId\", data.id);\r",
+                          "}\r",
+                          ""
+                        ],
+                        "type": "text/javascript",
+                        "packages": {},
+                        "requests": {}
+                      }
+                    }
+                  ],
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"msisdn\": \"+1234567890\",\n  \"plan_name\": \"Basic\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/accounts/:account_id/lines",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "accounts",
+                        ":account_id",
+                        "lines"
+                      ],
+                      "variable": [
+                        {
+                          "key": "account_id",
+                          "value": "{{accountId}}"
+                        }
+                      ]
+                    },
+                    "description": "Provisions a new line and associates it with the specified account.\n\n**Authentication:** Bearer token required (`Authorization: Bearer {{accessToken}}`)\n\n**Path Parameters:**\n\n- `account_id` (string, required) - The unique identifier of the account to associate the line with.\n    \n\n**Request Body (JSON):**\n\n- `msisdn` (string, required) - The msidn to assign to the new line.\n    \n- `plan_name` (string, required) - The service plan for the line (e.g., `prepaid`, `postpaid`).\n    \n\n**Responses:**\n\n- `201 Created` - Returns the newly created line object with its `line_id`.\n    \n- `400 Bad Request` - Validation error or phone number already in use.\n    \n- `404 Not Found` - Account not found.\n    \n- `401 Unauthorized` - Missing or invalid token."
+                  },
+                  "response": [
+                    {
+                      "name": "Successful Response",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: oauth2",
+                            "key": "Authorization",
+                            "value": "<token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"msisdn\": \"string\",\n  \"plan_name\": \"string\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/accounts/:account_id/lines",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "accounts",
+                            ":account_id",
+                            "lines"
+                          ],
+                          "variable": [
+                            {
+                              "key": "account_id",
+                              "value": "222d3dcd-9a27-e81b-9fe4-5898c8a116d5"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"id\": \"beef5dc9-4a20-b072-c4ec-0046cadef570\",\n  \"account_id\": \"67b4e0cf-f445-f1d3-56de-1da78635da72\",\n  \"msisdn\": \"string\",\n  \"plan_name\": \"string\",\n  \"status\": \"DELETED\",\n  \"created_at\": \"1946-08-13T09:27:00.576Z\"\n}"
+                    },
+                    {
+                      "name": "Validation Error",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: oauth2",
+                            "key": "Authorization",
+                            "value": "<token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"msisdn\": \"string\",\n  \"plan_name\": \"string\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/accounts/:account_id/lines",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "accounts",
+                            ":account_id",
+                            "lines"
+                          ],
+                          "variable": [
+                            {
+                              "key": "account_id",
+                              "value": "222d3dcd-9a27-e81b-9fe4-5898c8a116d5"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "Unprocessable Entity (WebDAV) (RFC 4918)",
+                      "code": 422,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        3474,\n        \"string\"\n      ],\n      \"msg\": \"string\",\n      \"type\": \"string\",\n      \"input\": \"\",\n      \"ctx\": {}\n    },\n    {\n      \"loc\": [\n        \"string\",\n        \"string\"\n      ],\n      \"msg\": \"string\",\n      \"type\": \"string\",\n      \"input\": \"\",\n      \"ctx\": {}\n    }\n  ]\n}"
+                    }
+                  ]
+                },
+                {
+                  "name": "List Lines For Account",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/accounts/:account_id/lines",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "accounts",
+                        ":account_id",
+                        "lines"
+                      ],
+                      "variable": [
+                        {
+                          "key": "account_id",
+                          "value": "{{accountId}}"
+                        }
+                      ]
+                    },
+                    "description": "Retrieves all lines associated with a specific account.\n\n**Authentication:** Bearer token required (`Authorization: Bearer {{accessToken}}`)\n\n**Path Parameters:**\n\n- `account_id` (string, required) - The unique identifier of the account.\n    \n\n**Query Parameters:**\n\n- `limit` (integer, optional) - Maximum number of records to return. Default: `100`.\n    \n\n**Responses:**\n\n- `200 OK` - Returns an array of line objects belonging to the account.\n    \n- `404 Not Found` - Account not found.\n    \n- `401 Unauthorized` - Missing or invalid token."
+                  },
+                  "response": [
+                    {
+                      "name": "Successful Response",
+                      "originalRequest": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: oauth2",
+                            "key": "Authorization",
+                            "value": "<token>"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/accounts/:account_id/lines",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "accounts",
+                            ":account_id",
+                            "lines"
+                          ],
+                          "variable": [
+                            {
+                              "key": "account_id",
+                              "value": "222d3dcd-9a27-e81b-9fe4-5898c8a116d5"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "[\n  {\n    \"id\": \"bde6f113-73f8-1cb4-72d5-97a6e417baac\",\n    \"account_id\": \"a63010dd-a94d-0386-ec42-658a4531fb0d\",\n    \"msisdn\": \"string\",\n    \"plan_name\": \"string\",\n    \"status\": \"PROVISIONED\",\n    \"created_at\": \"1994-03-01T21:26:04.588Z\"\n  },\n  {\n    \"id\": \"0404892b-b52c-8513-5638-803ed4891988\",\n    \"account_id\": \"33181202-22e0-31df-f291-03eaa0c865ea\",\n    \"msisdn\": \"string\",\n    \"plan_name\": \"string\",\n    \"status\": \"DELETED\",\n    \"created_at\": \"2012-05-22T13:25:51.596Z\"\n  }\n]"
+                    },
+                    {
+                      "name": "Validation Error",
+                      "originalRequest": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: oauth2",
+                            "key": "Authorization",
+                            "value": "<token>"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/accounts/:account_id/lines",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "accounts",
+                            ":account_id",
+                            "lines"
+                          ],
+                          "variable": [
+                            {
+                              "key": "account_id",
+                              "value": "222d3dcd-9a27-e81b-9fe4-5898c8a116d5"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "Unprocessable Entity (WebDAV) (RFC 4918)",
+                      "code": 422,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        3474,\n        \"string\"\n      ],\n      \"msg\": \"string\",\n      \"type\": \"string\",\n      \"input\": \"\",\n      \"ctx\": {}\n    },\n    {\n      \"loc\": [\n        \"string\",\n        \"string\"\n      ],\n      \"msg\": \"string\",\n      \"type\": \"string\",\n      \"input\": \"\",\n      \"ctx\": {}\n    }\n  ]\n}"
+                    }
+                  ]
+                }
+              ],
+              "description": "## Account Lines\n\nManage **service lines** (SIM cards / subscriptions) belonging to a specific account.\n\n- Use `GET /accounts/:account_id/lines` to list all lines for an account.\n    \n- Use `POST /accounts/:account_id/lines` to add a new line.\n    \n\n**Path variable used:** `:account_id` - The UUID of the parent account."
+            },
+            {
+              "name": "Get Account",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/accounts/:account_id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounts",
+                    ":account_id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "account_id",
+                      "value": "{{accountId}}"
+                    }
+                  ]
+                },
+                "description": "Retrieves the details of a specific account by its unique identifier.\n\n**Authentication:** Bearer token required (`Authorization: Bearer {{accessToken}}`)\n\n**Path Parameters:**\n\n- `account_id` (string, required) - The unique identifier of the account.\n    \n\n**Responses:**\n\n- `200 OK` - Returns the account object.\n    \n- `404 Not Found` - No account found with the given `account_id`.\n    \n- `401 Unauthorized` - Missing or invalid token."
+              },
+              "response": [
+                {
+                  "name": "Successful Response",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": "Added as a part of security scheme: oauth2",
+                        "key": "Authorization",
+                        "value": "<token>"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/accounts/:account_id",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "accounts",
+                        ":account_id"
+                      ],
+                      "variable": [
+                        {
+                          "key": "account_id",
+                          "value": "222d3dcd-9a27-e81b-9fe4-5898c8a116d5"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"id\": \"6c0484ab-20b5-4c69-b03c-695a9e89b706\",\n  \"full_name\": \"string\",\n  \"email\": \"string\",\n  \"phone\": \"string\",\n  \"status\": \"CLOSED\",\n  \"created_at\": \"1952-05-27T08:33:23.115Z\"\n}"
+                },
+                {
+                  "name": "Validation Error",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": "Added as a part of security scheme: oauth2",
+                        "key": "Authorization",
+                        "value": "<token>"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/accounts/:account_id",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "accounts",
+                        ":account_id"
+                      ],
+                      "variable": [
+                        {
+                          "key": "account_id",
+                          "value": "222d3dcd-9a27-e81b-9fe4-5898c8a116d5"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Unprocessable Entity (WebDAV) (RFC 4918)",
+                  "code": 422,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        3474,\n        \"string\"\n      ],\n      \"msg\": \"string\",\n      \"type\": \"string\",\n      \"input\": \"\",\n      \"ctx\": {}\n    },\n    {\n      \"loc\": [\n        \"string\",\n        \"string\"\n      ],\n      \"msg\": \"string\",\n      \"type\": \"string\",\n      \"input\": \"\",\n      \"ctx\": {}\n    }\n  ]\n}"
+                }
+              ]
+            },
+            {
+              "name": "Update Existing Account",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"full_name\": \"Updated User\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/accounts/:account_id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounts",
+                    ":account_id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "account_id",
+                      "value": "{{accountId}}"
+                    }
+                  ]
+                },
+                "description": "Updates the details of an existing account. All updatable fields should be provided in the request body.\n\n**Authentication:** Bearer token required (`Authorization: Bearer {{accessToken}}`)\n\n**Path Parameters:**\n\n- `account_id` (string, required) - The unique identifier of the account to update.\n    \n\n**Request Body (JSON):**\n\n- `full_name` (string, optional) - Updated name of the account holder.\n    \n- `email` (string, optional) - Updated email address.\n    \n- `phone` (string, optional) - Updated phone number.\n    \n\n**Responses:**\n\n- `200 OK` - Returns the updated account object.\n    \n- `404 Not Found` - No account found with the given `account_id`.\n    \n- `401 Unauthorized` - Missing or invalid token."
+              },
+              "response": [
+                {
+                  "name": "Successful Response",
+                  "originalRequest": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": "Added as a part of security scheme: oauth2",
+                        "key": "Authorization",
+                        "value": "<token>"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"full_name\": \"string\",\n  \"email\": null,\n  \"phone\": null,\n  \"status\": null\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/accounts/:account_id",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "accounts",
+                        ":account_id"
+                      ],
+                      "variable": [
+                        {
+                          "key": "account_id",
+                          "value": "222d3dcd-9a27-e81b-9fe4-5898c8a116d5"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"id\": \"6c0484ab-20b5-4c69-b03c-695a9e89b706\",\n  \"full_name\": \"string\",\n  \"email\": \"string\",\n  \"phone\": \"string\",\n  \"status\": \"CLOSED\",\n  \"created_at\": \"1952-05-27T08:33:23.115Z\"\n}"
+                },
+                {
+                  "name": "Validation Error",
+                  "originalRequest": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": "Added as a part of security scheme: oauth2",
+                        "key": "Authorization",
+                        "value": "<token>"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"full_name\": \"string\",\n  \"email\": null,\n  \"phone\": null,\n  \"status\": null\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/accounts/:account_id",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "accounts",
+                        ":account_id"
+                      ],
+                      "variable": [
+                        {
+                          "key": "account_id",
+                          "value": "222d3dcd-9a27-e81b-9fe4-5898c8a116d5"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Unprocessable Entity (WebDAV) (RFC 4918)",
+                  "code": 422,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        3474,\n        \"string\"\n      ],\n      \"msg\": \"string\",\n      \"type\": \"string\",\n      \"input\": \"\",\n      \"ctx\": {}\n    },\n    {\n      \"loc\": [\n        \"string\",\n        \"string\"\n      ],\n      \"msg\": \"string\",\n      \"type\": \"string\",\n      \"input\": \"\",\n      \"ctx\": {}\n    }\n  ]\n}"
+                }
+              ]
+            }
+          ],
+          "description": "## Single Account Operations\n\nEndpoints that operate on a **specific account** identified by `:account_id`.\n\nUse `{{accountId}}` as the path variable value - this is automatically populated when you run **Create New Account**."
+        },
+        {
+          "name": "List Accounts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/accounts/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "accounts",
+                ""
+              ]
+            },
+            "description": "Retrieves a list of all accounts in the system.\n\n**Authentication:** Bearer token required (`Authorization: Bearer {{accessToken}}`)\n\n**Query Parameters:**\n\n- `limit` (integer, optional) - Maximum number of records to return. Default: `100`.\n    \n\n**Responses:**\n\n- `200 OK` - Returns an array of account objects.\n    \n- `401 Unauthorized` - Missing or invalid token."
+          },
+          "response": [
+            {
+              "name": "Successful Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: oauth2",
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/accounts/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounts",
+                    ""
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"id\": \"e92fb24d-9ecb-c3ef-c827-1a9a636237ac\",\n    \"full_name\": \"string\",\n    \"email\": \"string\",\n    \"phone\": \"string\",\n    \"status\": \"SUSPENDED\",\n    \"created_at\": \"2020-10-27T12:41:32.958Z\"\n  },\n  {\n    \"id\": \"e7801498-fb76-2655-a14d-ec3dff26aa52\",\n    \"full_name\": \"string\",\n    \"email\": \"string\",\n    \"phone\": \"string\",\n    \"status\": \"SUSPENDED\",\n    \"created_at\": \"1981-04-06T23:40:23.303Z\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Create New Account",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const data = pm.response.json();",
+                  "",
+                  "if (data.id) {",
+                  "    pm.collectionVariables.set(\"accountId\", data.id);",
+                  "}",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"full_name\": \"Test User\",\n  \"email\": \"test@example.com\",\n  \"phone\": \"+15551234567\"\n}",
+              "options": {
+                "raw": {
+                  "headerFamily": "json",
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/accounts/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "accounts",
+                ""
+              ]
+            },
+            "description": "Creates a new telecom account in the platform.\n\n**Authentication:** Bearer token required (`Authorization: Bearer {{accessToken}}`)\n\n**Request Body (JSON):**\n\n- `full_name` (string, required) - Full name of the account holder.\n    \n- `email` (string, required) - Contact email address.\n    \n- `phone` (string, optional) - Contact phone number.\n    \n\n**Responses:**\n\n- `201 Created` - Returns the newly created account object with its `account_id`.\n    \n- `400 Bad Request` - Validation error in the request body.\n    \n- `401 Unauthorized` - Missing or invalid token."
+          },
+          "response": [
+            {
+              "name": "Successful Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: oauth2",
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"full_name\": \"string\",\n  \"email\": \"ggoNt4@CandKzEIyiSLuaQLQnckyvtfaJevhloBz.dy\",\n  \"phone\": \"string\",\n  \"status\": \"CLOSED\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/accounts/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounts",
+                    ""
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": \"6c0484ab-20b5-4c69-b03c-695a9e89b706\",\n  \"full_name\": \"string\",\n  \"email\": \"string\",\n  \"phone\": \"string\",\n  \"status\": \"CLOSED\",\n  \"created_at\": \"1952-05-27T08:33:23.115Z\"\n}"
+            },
+            {
+              "name": "Validation Error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "description": "Added as a part of security scheme: oauth2",
+                    "key": "Authorization",
+                    "value": "<token>"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"full_name\": \"string\",\n  \"email\": \"ggoNt4@CandKzEIyiSLuaQLQnckyvtfaJevhloBz.dy\",\n  \"phone\": \"string\",\n  \"status\": \"CLOSED\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/accounts/",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounts",
+                    ""
+                  ]
+                }
+              },
+              "status": "Unprocessable Entity (WebDAV) (RFC 4918)",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        3474,\n        \"string\"\n      ],\n      \"msg\": \"string\",\n      \"type\": \"string\",\n      \"input\": \"\",\n      \"ctx\": {}\n    },\n    {\n      \"loc\": [\n        \"string\",\n        \"string\"\n      ],\n      \"msg\": \"string\",\n      \"type\": \"string\",\n      \"input\": \"\",\n      \"ctx\": {}\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ],
+      "description": "## Accounts\n\nManage customer accounts in the platform. Each account represents a subscriber and holds personal details and a status.\n\nAll endpoints in this folder require a valid **Bearer token** in the `Authorization` header.\n\n**Path variable used:** `:account_id` - The UUID of the target account. Saved automatically to `{{accountId}}` by the Create New Account script.",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "requests": {},
+            "exec": [
+              "// Auto-refresh access token before each request",
+              "const refreshToken = pm.environment.get(\"refreshToken\");",
+              "",
+              "if (refreshToken) {",
+              "    const baseUrl = pm.environment.get(\"baseUrl\") || pm.collectionVariables.get(\"baseUrl\");",
+              "",
+              "    pm.sendRequest({",
+              "        url: baseUrl + \"/auth/refresh\",",
+              "        method: \"POST\",",
+              "        header: {",
+              "            \"Content-Type\": \"application/json\"",
+              "        },",
+              "        body: {",
+              "            mode: \"raw\",",
+              "            raw: JSON.stringify({ refresh_token: refreshToken })",
+              "        }",
+              "    }, function (err, res) {",
+              "        if (!err && res.code === 200) {",
+              "            const data = res.json();",
+              "",
+              "            if (data.access_token) {",
+              "                pm.environment.set(\"accessToken\", data.access_token);",
+              "            }",
+              "",
+              "            if (data.refresh_token) {",
+              "                pm.environment.set(\"refreshToken\", data.refresh_token);",
+              "            }",
+              "        }",
+              "    });",
+              "}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "lines",
+      "item": [
+        {
+          "name": "{line_id}",
+          "item": [
+            {
+              "name": "status",
+              "item": [
+                {
+                  "name": "Change Line Status",
+                  "request": {
+                    "method": "PATCH",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"status\": \"PROVISIONED\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/lines/:line_id/status",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "lines",
+                        ":line_id",
+                        "status"
+                      ],
+                      "variable": [
+                        {
+                          "key": "line_id",
+                          "value": "{{lineId}}"
+                        }
+                      ]
+                    },
+                    "description": "Updates the operational status of a specific telecom line (e.g., activate, suspend, or deactivate).\n\n**Authentication:** Bearer token required (`Authorization: Bearer {{accessToken}}`)\n\n**Path Parameters:**\n\n- `line_id` (string, required) - The unique identifier of the line.\n    \n\n**Request Body (JSON):**\n\n- `status` (string, required) - The new status for the line. Accepted values: `ACTIVE`, `SUSPENDED`, `DELETED`.\n    \n\n**Responses:**\n\n- `200 OK` - Returns the updated line object with the new status.\n    \n- `400 Bad Request` - Invalid status value provided.\n    \n- `404 Not Found` - No line found with the given `line_id`.\n    \n- `401 Unauthorized` - Missing or invalid token."
+                  },
+                  "response": [
+                    {
+                      "name": "Successful Response",
+                      "originalRequest": {
+                        "method": "PATCH",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: oauth2",
+                            "key": "Authorization",
+                            "value": "<token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"status\": \"PROVISIONED\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/lines/:line_id/status",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "lines",
+                            ":line_id",
+                            "status"
+                          ],
+                          "variable": [
+                            {
+                              "key": "line_id",
+                              "value": "5f8ad792-f1b7-9a04-531d-640c33a2a956"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"id\": \"beef5dc9-4a20-b072-c4ec-0046cadef570\",\n  \"account_id\": \"67b4e0cf-f445-f1d3-56de-1da78635da72\",\n  \"msisdn\": \"string\",\n  \"plan_name\": \"string\",\n  \"status\": \"DELETED\",\n  \"created_at\": \"1946-08-13T09:27:00.576Z\"\n}"
+                    },
+                    {
+                      "name": "Validation Error",
+                      "originalRequest": {
+                        "method": "PATCH",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: oauth2",
+                            "key": "Authorization",
+                            "value": "<token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"status\": \"PROVISIONED\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/lines/:line_id/status",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "lines",
+                            ":line_id",
+                            "status"
+                          ],
+                          "variable": [
+                            {
+                              "key": "line_id",
+                              "value": "5f8ad792-f1b7-9a04-531d-640c33a2a956"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "Unprocessable Entity (WebDAV) (RFC 4918)",
+                      "code": 422,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        3474,\n        \"string\"\n      ],\n      \"msg\": \"string\",\n      \"type\": \"string\",\n      \"input\": \"\",\n      \"ctx\": {}\n    },\n    {\n      \"loc\": [\n        \"string\",\n        \"string\"\n      ],\n      \"msg\": \"string\",\n      \"type\": \"string\",\n      \"input\": \"\",\n      \"ctx\": {}\n    }\n  ]\n}"
+                    }
+                  ]
+                }
+              ],
+              "description": "## Line Status\n\nUpdate the **operational status** of a service line.\n\nValid status transitions:\n\n- `PROVISIONED` → `ACTIVE` (via commission endpoint), `SUSPENDED`, `DELETED`\n    \n- `ACTIVE` → `SUSPENDED`, `DELETED`\n    \n- `SUSPENDED` → `ACTIVE`, `DELETED`\n    \n- `DELETED`"
+            },
+            {
+              "name": "commission",
+              "item": [
+                {
+                  "name": "Commission Line Endpoint",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/lines/:line_id/commission",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "lines",
+                        ":line_id",
+                        "commission"
+                      ],
+                      "variable": [
+                        {
+                          "key": "line_id",
+                          "value": "{{lineId}}"
+                        }
+                      ]
+                    },
+                    "description": "Commissions a line, triggering the provisioning workflow to make the line fully operational on the network.\n\n**Authentication:** Bearer token required (`Authorization: Bearer {{accessToken}}`)\n\n**Path Parameters:**\n\n- `line_id` (string, required) - The unique identifier of the line to commission.\n    \n\n**Responses:**\n\n- `200 OK` - Line successfully commissioned and activated on the network.\n    \n- `400 Bad Request` - Line is already commissioned.\n    \n- `404 Not Found` - No line found with the given `line_id`.\n    \n- `401 Unauthorized` - Missing or invalid token."
+                  },
+                  "response": [
+                    {
+                      "name": "Successful Response",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: oauth2",
+                            "key": "Authorization",
+                            "value": "<token>"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/lines/:line_id/commission",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "lines",
+                            ":line_id",
+                            "commission"
+                          ],
+                          "variable": [
+                            {
+                              "key": "line_id",
+                              "value": "5f8ad792-f1b7-9a04-531d-640c33a2a956"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"id\": \"beef5dc9-4a20-b072-c4ec-0046cadef570\",\n  \"account_id\": \"67b4e0cf-f445-f1d3-56de-1da78635da72\",\n  \"msisdn\": \"string\",\n  \"plan_name\": \"string\",\n  \"status\": \"DELETED\",\n  \"created_at\": \"1946-08-13T09:27:00.576Z\"\n}"
+                    },
+                    {
+                      "name": "Validation Error",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "application/json"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: oauth2",
+                            "key": "Authorization",
+                            "value": "<token>"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/lines/:line_id/commission",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "lines",
+                            ":line_id",
+                            "commission"
+                          ],
+                          "variable": [
+                            {
+                              "key": "line_id",
+                              "value": "5f8ad792-f1b7-9a04-531d-640c33a2a956"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "Unprocessable Entity (WebDAV) (RFC 4918)",
+                      "code": 422,
+                      "_postman_previewlanguage": "json",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        3474,\n        \"string\"\n      ],\n      \"msg\": \"string\",\n      \"type\": \"string\",\n      \"input\": \"\",\n      \"ctx\": {}\n    },\n    {\n      \"loc\": [\n        \"string\",\n        \"string\"\n      ],\n      \"msg\": \"string\",\n      \"type\": \"string\",\n      \"input\": \"\",\n      \"ctx\": {}\n    }\n  ]\n}"
+                    }
+                  ]
+                }
+              ],
+              "description": "## Commission\n\nTriggers the **commissioning process** for a provisioned line, activating it on the network.\n\n> The line must have a status of `PROVISIONED` before it can be commissioned."
+            },
+            {
+              "name": "Remove Line",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/lines/:line_id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "lines",
+                    ":line_id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "line_id",
+                      "value": "{{lineId}}"
+                    }
+                  ]
+                },
+                "description": "Permanently removes a line from the platform. This action is irreversible.\n\n**Authentication:** Bearer token required (`Authorization: Bearer {{accessToken}}`)\n\n**Path Parameters:**\n\n- `line_id` (string, required) - The unique identifier of the line to delete.\n    \n\n**Responses:**\n\n- `204 No Content` - Line successfully deleted.\n    \n- `404 Not Found` - No line found with the given `line_id`.\n    \n- `401 Unauthorized` - Missing or invalid token."
+              },
+              "response": [
+                {
+                  "name": "Successful Response",
+                  "originalRequest": {
+                    "method": "DELETE",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": "Added as a part of security scheme: oauth2",
+                        "key": "Authorization",
+                        "value": "<token>"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/lines/:line_id",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "lines",
+                        ":line_id"
+                      ],
+                      "variable": [
+                        {
+                          "key": "line_id",
+                          "value": "5f8ad792-f1b7-9a04-531d-640c33a2a956"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"id\": \"beef5dc9-4a20-b072-c4ec-0046cadef570\",\n  \"account_id\": \"67b4e0cf-f445-f1d3-56de-1da78635da72\",\n  \"msisdn\": \"string\",\n  \"plan_name\": \"string\",\n  \"status\": \"DELETED\",\n  \"created_at\": \"1946-08-13T09:27:00.576Z\"\n}"
+                },
+                {
+                  "name": "Validation Error",
+                  "originalRequest": {
+                    "method": "DELETE",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "application/json"
+                      },
+                      {
+                        "description": "Added as a part of security scheme: oauth2",
+                        "key": "Authorization",
+                        "value": "<token>"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/lines/:line_id",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "lines",
+                        ":line_id"
+                      ],
+                      "variable": [
+                        {
+                          "key": "line_id",
+                          "value": "5f8ad792-f1b7-9a04-531d-640c33a2a956"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "Unprocessable Entity (WebDAV) (RFC 4918)",
+                  "code": 422,
+                  "_postman_previewlanguage": "json",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"detail\": [\n    {\n      \"loc\": [\n        3474,\n        \"string\"\n      ],\n      \"msg\": \"string\",\n      \"type\": \"string\",\n      \"input\": \"\",\n      \"ctx\": {}\n    },\n    {\n      \"loc\": [\n        \"string\",\n        \"string\"\n      ],\n      \"msg\": \"string\",\n      \"type\": \"string\",\n      \"input\": \"\",\n      \"ctx\": {}\n    }\n  ]\n}"
+                }
+              ]
+            }
+          ],
+          "description": "## Single Line Operations\n\nEndpoints that operate on a **specific service line** identified by `:line_id`.\n\n| Operation | Endpoint |\n| --- | --- |\n| Delete line | `DELETE /lines/:line_id` |\n| Change status | `PATCH /lines/:line_id/status` |\n| Commission line | `POST /lines/:line_id/commission` |"
+        }
+      ],
+      "description": "## Lines\n\nDirect line management endpoints. These operate on a **specific line** identified by `:line_id`.\n\nUse `{{lineId}}` as the path variable - this is automatically populated when you run **Create New Line**.\n\nIncludes status updates, deletion, and commissioning of lines.",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "requests": {},
+            "exec": [
+              "// Auto-refresh access token before each request",
+              "const refreshToken = pm.environment.get(\"refreshToken\");",
+              "",
+              "if (refreshToken) {",
+              "    const baseUrl = pm.environment.get(\"baseUrl\") || pm.collectionVariables.get(\"baseUrl\");",
+              "",
+              "    pm.sendRequest({",
+              "        url: baseUrl + \"/auth/refresh\",",
+              "        method: \"POST\",",
+              "        header: {",
+              "            \"Content-Type\": \"application/json\"",
+              "        },",
+              "        body: {",
+              "            mode: \"raw\",",
+              "            raw: JSON.stringify({ refresh_token: refreshToken })",
+              "        }",
+              "    }, function (err, res) {",
+              "        if (!err && res.code === 200) {",
+              "            const data = res.json();",
+              "",
+              "            if (data.access_token) {",
+              "                pm.environment.set(\"accessTokn\", data.access_token);",
+              "            }",
+              "",
+              "            if (data.refresh_token) {",
+              "                pm.environment.set(\"refreshToken\", data.refresh_token);",
+              "            }",
+              "        }",
+              "    });",
+              "}"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "oauth2",
+    "oauth2": [
+      {
+        "key": "tokenType",
+        "value": "",
+        "type": "string"
+      },
+      {
+        "key": "accessToken",
+        "value": "{{accessTokn}}",
+        "type": "string"
+      },
+      {
+        "key": "addTokenTo",
+        "value": "header",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "/"
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    },
+    {
+      "key": "refreshToken",
+      "value": ""
+    },
+    {
+      "key": "accountId",
+      "value": ""
+    },
+    {
+      "key": "lineId",
+      "value": ""
+    }
+  ]
+}
