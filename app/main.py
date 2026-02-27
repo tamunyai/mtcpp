@@ -23,9 +23,13 @@ async def lifespan(app: FastAPI):
 
     try:
         Base.metadata.create_all(bind=engine)
-        init_db()  # Seed Admin/Operator users
 
-        logger.info("Database initialized and seeded successfully.")
+        if settings.DEV:
+            init_db()  # Seed Admin/Operator users
+            logger.info("Database initialized and seeded successfully.")
+
+        else:
+            logger.info("Database initialized.")
 
     except Exception as e:
         logger.error(f"Error during database initialization: {e}")

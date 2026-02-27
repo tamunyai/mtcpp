@@ -9,9 +9,10 @@ class Settings(BaseSettings):
     APP_NAME: str = "Mini Telecom Commissioning & Provisioning Platform - API"
     APP_VERSION: str = "0.1.0"
     APP_DESCRIPTION: str = (
-        "Lightweight provisioning API for accounts and service lines (commissioning simulation)."
+        "A lightweight service provisioning & commissioning API for accounts and service lines."
     )
     DEBUG: bool = False
+    PROD: bool = False
 
     # Security & JWT
     SECRET_KEY: str = "super-secret-key"
@@ -52,6 +53,11 @@ class Settings(BaseSettings):
     @property
     def LOG_FILE(self) -> str:
         return os.path.join(self.LOG_DIR, "{time:YYYY-MM-DD}.log")
+
+    @computed_field
+    @property
+    def DEV(self) -> bool:
+        return not self.PROD
 
 
 settings = Settings()
