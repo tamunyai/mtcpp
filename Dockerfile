@@ -1,5 +1,5 @@
 # Base image
-FROM python:3.14-slim-bookworm
+FROM python:3.14.2-slim-bookworm
 
 # Runtime env: clean FS, real-time logs, predictable imports
 ENV PYTHONDONTWRITEBYTECODE=1 \
